@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Matcha · Coffee · Tea — Stacked Nutrients (Horizontal)</title>
+  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+  <style>
+    body{margin:0;background:transparent;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    .wrap{max-width:100%;margin:28px 0 48px;padding:0 16px}
+    h1{margin:0 0 8px;color:#10351e}
+    p.sub{margin:0 0 12px;color:#485a4d}
+    #vis{background:transparent;box-shadow:none;border-radius:0;padding:0;width:100%}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Stacked Nutrients per 100 mL — Matcha vs Coffee vs Green Tea</h1>
+  <p class="sub">Caffeine · Polyphenols · Flavonoids · L-theanine · Vitamin C — toggle absolute vs percent.</p>
+  <div id="vis"></div>
+</div>
+
+<script>
+const spec = {
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "background": null,
+
+  "data": {
+    "url": "matcha_coffee_tea_compare.csv",
+    "format": {
+      "type": "csv",
+      "parse": {
+        "serving_ml": "number",
+        "caffeine_mg": "number",
+        "theanine_mg": "number",
+        "polyphenol_mg": "number",
+        "vitaminc_mg": "number",
+        "flavonoids_mg": "number"
+      }
+    }
+  },
+
+  "width": "container",
+  "height": 260,
+  "autosize": {"type":"fit","contains":"padding"},
+  "config": {
+    "view": {"stroke": null},
+    "axis": {"gridColor":"#e6efe6","labelColor":"#1e3626","titleColor":"#1e3626"},
+    "legend": {"labelColor":"#1e3626","titleColor":"#1e3626"}
+  },
+
+  /* separate x scales so percent can be 0–100% while absolute uses mg */
+  "resolve": { "scale": { "x": "independent" } },
+
+  "params": [
+    {
+      "name": "mode",
+      "value": "Absolute (mg)",
+      "bind": {"input":"radio","options":["Absolute (mg)","Percent"],"name":"View: "}
+    }
+  ],
+
+  "transform": [
+    {
+      "fold": [
+        "caffeine_mg",
+        "polyphenol_mg",
+        "flavonoids_mg",
+        "theanine_mg",
+        "vitaminc_mg"
+      ],
+      "as": ["nutrient","amount"]
+    },
+    {
+      "calculate":
+        "datum.nutrient=='caffeine_mg' ? 'Caffeine' : " +
+        "datum.nutrient=='polyphenol_mg' ? 'Polyphenols' : " +
+        "datum.nutrient=='flavonoids_mg' ? 'Flavonoids' : " +
+        "datum.nutrient=='theanine_mg' ? 'L-theanine' : " +
+        "datum.nutrient=='vitaminc_mg' ? 'Vitamin C' : datum.nutrient",
+      "as": "label"
+    },
+    { "calculate": "isValid(datum.amount) ? datum.amount : 0", "as": "amount_safe" },
+    {
+      "calculate":
+        "datum.label=='Caffeine' ? 1 : " +
+        "datum.label=='Polyphenols' ? 2 : " +
+        "datum.label=='Flavonoids' ? 3 : " +
+        "datum.label=='L-theanine' ? 4 : " +
+        "datum.label=='Vitamin C' ? 5 : 99",
+      "as": "nut_order"
+    },
+    {"joinaggregate": [{"op":"sum","field":"amount_safe","as":"tot"}], "groupby":["drink"]},
+    {"calculate": "datum.amount_safe / datum.tot", "as":"pct"}
+  ],
+
+  "layer": [
+    /* ---------- AXIS CARRIERS (independent, filtered) ---------- */
+    {
+      "transform": [{"filter": "mode == 'Absolute (mg)'" }],
+      "mark": {"type":"point","opacity":0},
+      "encoding": {
+        "x": {"field":"amount_safe","type":"quantitative","title":"mg per 100 mL (stacked)","stack":"zero","axis":{"format":",.0f","orient":"bottom"}}
+      }
+    },
+    {
+      "transform": [{"filter": "mode == 'Percent'"}],
+      "mark": {"type":"point","opacity":0},
+      "encoding": {
+        "x": {"field":"pct","type":"quantitative","title":"Share of total (%)","stack":"zero","scale":{"domain":[0,1]},"axis":{"format":".0%","orient":"top","tickCount":5}}
+      }
+    },
+    /* ---------- ABSOLUTE (mg) — bottom axis ---------- */
+    {
+      "transform": [{"filter": "mode == 'Absolute (mg)'" }],
+      "mark": {"type":"bar","cornerRadiusEnd":3},
+      "encoding": {
+        "y": {"field":"drink","type":"nominal","title":"Drink",
+              "sort":["coffee","matcha","green_tea"]},
+        "x": { "field":"amount_safe","type":"quantitative","title":"mg per 100 mL (stacked)","stack":"zero","axis": null },
+        "color": {
+          "field":"label","type":"nominal","title":"Nutrient",
+          "scale":{"domain":["Caffeine","Polyphenols","Flavonoids","L-theanine","Vitamin C"],
+                   "range":["#8B5E3C","#2F7D5C","#7A8F35","#9ED36A","#D4A80B"]}
+        },
+        "order":{"field":"nut_order","type":"ordinal"},
+        "tooltip":[
+          {"field":"drink","title":"Drink"},
+          {"field":"label","title":"Nutrient"},
+          {"field":"amount_safe","title":"Amount (mg)","format":",.0f"},
+          {"field":"serving_ml","title":"Serving (mL)"}
+        ]
+      }
+    },
+
+    /* ---------- PERCENT (0–100%) — bottom axis ---------- */
+    {
+      "transform": [{"filter": "mode == 'Percent'"}],
+      "mark": {"type":"bar","cornerRadiusEnd":3},
+      "encoding": {
+        "y": {"field":"drink","type":"nominal","title":"Drink",
+              "sort":["coffee","matcha","green_tea"]},
+        "x": { "field":"pct","type":"quantitative","title":"Share of total (%)","stack":"zero","scale":{"domain":[0,1]},"axis": null },
+        "color": {
+          "field":"label","type":"nominal","title":"Nutrient",
+          "scale":{"domain":["Caffeine","Polyphenols","Flavonoids","L-theanine","Vitamin C"],
+                   "range":["#8B5E3C","#2F7D5C","#7A8F35","#9ED36A","#D4A80B"]}
+        },
+        "order":{"field":"nut_order","type":"ordinal"},
+        "tooltip":[
+          {"field":"drink","title":"Drink"},
+          {"field":"label","title":"Nutrient"},
+          {"field":"pct","title":"Share","format":".1%"},
+          {"field":"serving_ml","title":"Serving (mL)"}
+        ]
+      }
+    },
+
+    /* ---------- totals label (absolute only) — no axis ---------- */
+    {
+      "transform": [
+        {"filter": "mode == 'Absolute (mg)'" },
+        {"aggregate":[{"op":"sum","field":"amount_safe","as":"total"}], "groupby":["drink"]},
+        {"calculate": "datum.total * 1.01", "as":"xpos"}
+      ],
+      "mark": {"type":"text","dx":4,"fontWeight":"bold","color":"#1e3626"},
+      "encoding": {
+        "y": {"field":"drink","type":"nominal","sort":["coffee","matcha","green_tea"]},
+        "x": {"field":"xpos","type":"quantitative", "axis": null},
+        "text": {"field":"total","format":",.0f"}
+      }
+    }
+  ]
+};
+
+vegaEmbed("#vis", spec, {actions:false}).catch(err=>{
+  const pre=document.createElement('pre'); pre.textContent=String(err);
+  document.querySelector('.wrap').appendChild(pre);
+  console.error(err);
+});
+</script>
+</body>
+</html>

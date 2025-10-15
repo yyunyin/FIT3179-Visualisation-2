@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Matcha: Delving into the World’s Calmest Caffeine Craze</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=telma@1&display=swap" rel="stylesheet">
+
+  <style>
+    html, body { margin:0; padding:0; }
+    body { background:#e9f5e1; font-family:'Nunito Sans',sans-serif; color:#1e3a1a; }
+
+    .container { max-width:1000px; margin:0 auto; padding:8px 20px 24px; }
+
+    /* tighter header */
+    .header { text-align:center; background:transparent; padding:4px 0 0; margin:4px 0 8px; }
+    .matcha-logo { display:block; width:min(600px,92vw); height:auto; margin:0 auto 4px; }
+    .subtitle { font-family:'Telma','Lora',serif; font-weight:500; font-size:1.35rem; color:#2e4826; margin:4px 0 0; }
+
+    /* section titles */
+    h3.sec-title { margin:14px 0 2px; font-size:18px; color:#1e3a1a; }
+    p.sec-sub { margin:0 0 8px; color:#3a5a40; font-size:14px; }
+
+    /* cards/iframes: reduce vertical gaps */
+    .card { background:transparent; border-radius:0; box-shadow:none; padding:0; margin:6px 0 12px; }
+    .frame-wrap { position:relative; width:100%; margin: 0; } /* kill default gap */
+    iframe.embed { width:100%; height:var(--h,520px); border:0; display:block; background:transparent; overflow:hidden; }
+
+    /* full-bleed rows; pull the FIRST one up slightly */
+    .bleed { width:100vw; margin-left:calc(50% - 50vw); padding:0 20px; }
+    .bleed:first-of-type { margin-top:-12px; } /* <-- nudge map up; adjust as needed (-20 to -4) */
+
+    footer { text-align:center; font-size:.9em; color:#3a5a40; margin-top:22px; opacity:.8; }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <img src="matcha_header_cropped_2.png" alt="Matcha header logo" class="matcha-logo">
+      <h2 class="subtitle">Delving into the World’s Calmest Caffeine Craze</h2>
+    </div>
+  </div>
+
+  <!-- 🗺️ Map (full-bleed) -->
+  <section class="bleed">
+    <div class="card">
+      <div class="frame-wrap">
+        <!-- Adjust --h to fit the entire map + legend -->
+        <iframe class="embed" style="--h:755px"
+                src="matcha_producers.html"
+                title="Matcha Map / Cartogram"
+                loading="lazy"
+                scrolling="no"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <!-- 🕰 Timeline (full-bleed if you like) -->
+    <section class="bleed">
+      <div class="card">
+        <div class="frame-wrap">
+          <iframe class="embed" style="--h:300px"
+                  src="timeline.html"
+                  title="Timeline"
+                  loading="lazy"
+                  scrolling="no"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <!-- Radars -->
+    <div class="section-wrap" style="--max:2000px;">
+      <h3 class="sec-title sec-center">Radar Comparison — Matcha · Coffee · Green Tea</h3>
+      <p class="sec-sub sec-center">Multi-metric radial view, one radar per drink.</p>
+      <div class="card">
+        <div class="frame-wrap">
+          <iframe class="embed" style="--h:360px"
+                  src="matcha_origin_nutrient_radar.html"
+                  title="Radars"
+                  loading="lazy"
+                  scrolling="no"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stacked Nutrients -->
+    <section class="section-wrap" style="--max:1100px;">
+      <div class="card">
+        <div class="frame-wrap">
+          <iframe class="embed" style="--h:440px"
+                  src="matcha_coffee_tea_compare.html"
+                  title="Stacked Nutrients"
+                  loading="lazy"
+                  scrolling="no"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>Data estimated for 2024 matcha production. Visualization by Foo Yun Yin.</p>
+    </footer>
+  </div>
+</body>
+</html>

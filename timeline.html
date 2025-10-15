@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Matcha — Ceremony → Commodity</title>
+<style>
+  :root{
+    --bg:#e9f5e1;
+    --text:#1e3a1a;
+    --accent:#7fbf7f;          /* circle fill */
+    --accent-stroke:#1e3a1a;   /* circle stroke */
+    --track:#000000;           /* BLACK line */
+    --circle:22px;             /* circle size */
+    --track-height:3px;        /* line thickness */
+    --track-top:18px;          /* distance from top of wrapper */
+  }
+  html, body { margin:0; padding:0; }
+  body { background: transparent; color:var(--text); font-family:system-ui, Arial, sans-serif; }
+  .container { max-width:1200px; margin:0 auto; padding:16px 20px 40px; }
+  h2 { margin:4px 0 18px; font-size:54px; line-height:1.1; }
+
+  /* === Timeline layout === */
+  .timeline-wrap{
+    position: relative;
+    padding-top: calc(var(--track-top) + var(--circle) / 2 + 12px); /* space for line + circles */
+  }
+  /* Black line BEHIND circles */
+  .timeline-track{
+    position: absolute;
+    left: 0; right: 0;
+    top: var(--track-top);
+    height: var(--track-height);
+    background: var(--track);
+    border-radius: 999px;
+    z-index: 0;                 /* behind */
+  }
+
+  /* Columns */
+  .timeline-grid{
+    position: relative;
+    z-index: 1;                 /* above the line */
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 24px;
+    text-align: center;
+  }
+  .tcard{ position: relative; padding-top: 10px; }
+  .tyear  { font-weight:800; font-size:14px; margin-bottom:6px; letter-spacing:.2px; }
+  .tevent { font-weight:700; font-size:14px; line-height:1.2; margin-bottom:6px; }
+  .tdesc  { font-size:12px; line-height:1.35; color:#245024; }
+
+  /* Circle above each column */
+  .tcard::before{
+    content:"";
+    position:absolute;
+    left:50%;
+    transform:translateX(-50%);
+    width:var(--circle); height:var(--circle);
+    top: calc(-1 * (var(--circle) + 14px)); /* sit on the black line */
+    background:var(--accent);
+    border:1.5px solid var(--accent-stroke);
+    border-radius:50%;
+    box-shadow:0 1px 2px rgba(0,0,0,.08);
+    z-index:1;                  /* above the line */
+  }
+
+  /* Responsive */
+  @media (max-width:1100px){ .timeline-grid{ grid-template-columns:repeat(4,1fr); } }
+  @media (max-width:640px){  .timeline-grid{ grid-template-columns:repeat(2,1fr); } }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h2>From Ceremony to Commodity</h2>
+
+    <div class="timeline-wrap">
+      <div class="timeline-track"></div>  <!-- black line behind circles -->
+      <div id="timeline_grid" class="timeline-grid"></div>
+    </div>
+  </div>
+
+<script>
+  const timelineData = [
+    { year: 800,  event: "Tang Dynasty tea",      desc: "Stone-milled powder emerges in China" },
+    { year: 1191, event: "Zen monks to Japan",    desc: "Eisai popularizes powdered green tea" },
+    { year: 1500, event: "Chanoyu formalized",    desc: "Wabi-sabi tea ceremony codified" },
+    { year: 1890, event: "Steam + stone milling", desc: "Modern sencha/tencha processing matures" },
+    { year: 1990, event: "Cafe culture abroad",   desc: "Early adoption in US/EU cafés" },
+    { year: 2012, event: "Instagram era",         desc: "Matcha lattes and desserts go viral" },
+    { year: 2016, event: "RTD & retail",          desc: "Canned matcha and supermarket brands" },
+    { year: 2020, event: "Wellness boom",         desc: "Matcha in supplements and beauty" }
+  ];
+
+  const grid = document.getElementById('timeline_grid');
+  grid.innerHTML = '';
+  timelineData.sort((a,b)=>a.year-b.year).forEach(d=>{
+    const card = document.createElement('div');
+    card.className = 'tcard';
+    card.innerHTML = `
+      <div class="tyear">${d.year}</div>
+      <div class="tevent">${d.event}</div>
+      <div class="tdesc">${d.desc}</div>
+    `;
+    grid.appendChild(card);
+  });
+</script>
+</body>
+</html>
